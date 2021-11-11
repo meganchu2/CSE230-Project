@@ -2,7 +2,7 @@
 
 Todo:
 
-1. [Everyone fill out google form)](#1)
+1. [Everyone fill out google form](#1)
 2. [Work on base of project](#2)
 
 ## Project Flappy Bird
