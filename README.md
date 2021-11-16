@@ -1,7 +1,12 @@
 # CSE230-Project
 Line Application with Brick Library
 
-Team: Megan Chu, Wei-Cheng Huang, Dieter Joubert, Emma Hogan
+# Team
+
+* Megan Chu
+* Wei-Cheng Huang
+* Dieter Joubert 
+* Emma Hogan
 
 # Proposal
 We plan to implement the popular game Flappy Bird using Haskell brick. This game involves one moving object, the bird, which is controlled by the user to move strictly vertically up and down in order to clear an ongoing series of gates. The bird object is continuously “falling,” moving downwards at a constant rate unless it is triggered by the user. There is only one type of input control from the user, which triggers the bird object to move a certain amount upwards. The game terminates when the user unsuccessfully clears a gate, and the bird collides with the gate.
@@ -15,7 +20,11 @@ System.Random.Shuffle: We will use this package to provide a different random �
 
 # Source code overview
 
+todo
+
 # Installation
 
-# Playing the Game
+todo
 
+# Playing the Game
+ todo
