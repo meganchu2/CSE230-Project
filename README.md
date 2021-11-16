@@ -13,5 +13,9 @@ We plan to use the following packages to help implement the corresponding featur
 System.console.haskeline: We will use this package to process user input from the keyboard
 System.Random.Shuffle: We will use this package to provide a different random “course” every time the game is played by shuffling a list of possible gates
 
+# Source code overview
 
+# Installation
+
+# Playing the Game
 
