@@ -10,7 +10,8 @@
 - [ ] barriers
   - [ ] create barrier
   - [ ] move barrier left as time progresses
-  - [ ] create multiple barriers and randomize opening
+  - [ ] create new barrier every X seconds
+  - [ ] randomize openings of barriers
 - [ ] gameplay
   - [ ] end game if bird hits barrier
 - [ ] appearance
