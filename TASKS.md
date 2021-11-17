@@ -13,3 +13,6 @@
   - [ ] create multiple barriers and randomize opening
 - [ ] gameplay
   - [ ] end game if bird hits barrier
+- [ ] appearance
+  - [ ] set colors to match Flappy Bird original
+  - [ ] create alternating, moving colors at bottom of of screen to simulate movement 
