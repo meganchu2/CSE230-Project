@@ -69,21 +69,21 @@ die = do
   MaybeT . fmap guard $ elem <$> (nextPosition <$> get) <*> (use bird)
   MaybeT . fmap Just $ dead .= True
 
--- | Move snake along in a marquee fashion
+-- | Move bird along in a marquee fashion
 move :: Game -> Game
 move g@Game { _bird = (s :|> _) } = g 
                                       & bird .~ (nextPosition g <| s) 
                                       & dir .~ Down --sets the Direction back to Down
-move _                             = error "Snakes can't be empty!"
+move _                             = error "bird can't be empty!"
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
 nextPosition Game { _dir = d, _bird = (a :<| _) }
   | d == Up    = a 
-                & _y %~ (\y -> (y + 2) )
+                & _y %~ (\y -> (y + 4) )
   | d == Down  = a 
                 & _y %~ (\y -> (y - 1) )
-nextPosition _ = error "Snakes can't be empty!"
+nextPosition _ = error "bird can't be empty!"
 
 
 -- Implicitly unpauses yet locks game
