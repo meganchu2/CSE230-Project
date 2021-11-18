@@ -24,7 +24,12 @@ todo
 
 # Installation
 
-todo
+To build, use `stack`:
+
+```bash
+stack build
+stack exec flappybird
+```
 
 # Playing the Game
  todo
