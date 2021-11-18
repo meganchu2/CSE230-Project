@@ -20,3 +20,4 @@
   - [ ] set colors to match Flappy Bird original
   - [ ] create alternating, moving colors at bottom of of screen to simulate movement 
 - [ ] tests
+- [ ] restart screen
