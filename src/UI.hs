@@ -111,6 +111,7 @@ drawCell Bird = withAttr birdAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
 
+-- comment
 cw :: Widget Name
 cw = str "  "
 
