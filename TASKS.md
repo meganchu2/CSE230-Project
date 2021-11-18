@@ -1,6 +1,6 @@
 # Tasks
 
-- [ ] grid
+- [-] grid
 - [ ] bird
   - [ ] show bird on screen
   - [ ] move bird down by default
@@ -14,6 +14,7 @@
   - [ ] show score
   - [ ] increment score as barriers are cleared
 - [ ] gameplay
+  - [ ] end game if bird hits ground 
   - [ ] end game if bird hits barrier
 - [ ] appearance
   - [ ] set colors to match Flappy Bird original
