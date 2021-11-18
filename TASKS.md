@@ -1,6 +1,6 @@
 # Tasks
 
-- [-] grid
+- [x] grid
 - [ ] bird
   - [ ] show bird on screen
   - [ ] move bird down by default
