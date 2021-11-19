@@ -20,7 +20,9 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 
 # Source code overview
 
-todo
+* `Main.hs`: todo
+* `FlappyBird.hs`: todo
+* `UI.hs`: todo
 
 # Installation
 
