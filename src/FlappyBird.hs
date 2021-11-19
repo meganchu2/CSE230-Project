@@ -50,10 +50,16 @@ maybeDie = do
   MaybeT . (fmap guard) $ (do 
     { 
       nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
-      birdPositions <- (use bird);
-      return (False)        --should instead check if nextPos is on barrier or below bottom, (elem nextPos birdPositions || belowBottom )
+      birdPosition <- (use bird);
+      barriers <- (use barriers);
+      return (isCoordOnAnyBarrier barriers nextPos)        --should instead check if nextPos is on barrier or below bottom, (elem nextPos birdPositions || belowBottom )
     })  
   MaybeT . (fmap Just) $ (dead .= True)
+
+-- | returns true if coordinate is on any of the barriers (to determine whether game ends)
+isCoordOnAnyBarrier :: Barriers -> Coord -> Bool
+isCoordOnAnyBarrier barriers c = any isCoordOnBarrier barriers
+    where isCoordOnBarrier barrier = c `elem` barrier
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
