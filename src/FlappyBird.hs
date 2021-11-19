@@ -30,7 +30,7 @@ import Constants
 -- Types
 
 data Game = Game
-  { _bird   :: Bird          -- ^ bird as a sequence of points in N2
+  { _bird   :: Bird         -- ^ bird as a coordinate
   , _dir    :: Direction    -- ^ direction
   , _dead   :: Bool         -- ^ game over flag
   , _paused :: Bool         -- ^ paused flag
@@ -40,7 +40,7 @@ data Game = Game
 
 type Coord = V2 Int
 
-type Bird = Seq Coord
+type Bird = Coord
 
 data Stream a = a :| Stream a
   deriving (Show)
@@ -66,28 +66,28 @@ step s = flip execState s . runMaybeT $ do
 -- | Possibly die if next position is either on a barrier cell or above below grid (TODO)
 die :: MaybeT (State Game) ()
 die = do
-  --MaybeT . (fmap guard) $ (elem <$> (nextPosition <$> get) <*> (use bird))
-  MaybeT . (fmap guard) $ (do { 
-                            nextPos <- (nextPosition <$> get);      --get next position of bird
-                            birdPositions <- (use bird);            --get current positions of bird
-                            return (elem nextPos birdPositions) })  --check if next position is in current position
+  MaybeT . (fmap guard) $ (do 
+    { 
+      nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
+      birdPositions <- (use bird);
+      return (False)        --should instead check if nextPos is on barrier or below bottom, (elem nextPos birdPositions || belowBottom )
+    })  
   MaybeT . (fmap Just) $ (dead .= True)
 
--- | Move snake along in a marquee fashion
+-- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = (s :|> _) } = g 
-                                      & bird .~ (nextPosition g <| s) 
-                                      & dir .~ Down --sets the Direction back to Down
-move _                             = error "Snakes can't be empty!"
+move g@Game { _bird = b } = g 
+          & bird .~ (nextPosition g) 
+          & dir .~ Down --sets the Direction back to Down
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
-nextPosition Game { _dir = d, _bird = (a :<| _) }
+nextPosition Game { _dir = d, _bird = a }
   | d == Up    = a 
                 & _y %~ (\y -> (y + 2) )
   | d == Down  = a 
                 & _y %~ (\y -> (y - 1) )
-nextPosition _ = error "Snakes can't be empty!"
+nextPosition _ = error "Birds can't be empty!"
 
 
 -- Implicitly unpauses yet locks game
@@ -106,7 +106,7 @@ initGame = do
   let xm = width `div` 2
       ym = height `div` 2
       g  = Game
-        { _bird  = (S.singleton (V2 xm ym))
+        { _bird  = V2 xm ym
         , _score  = 0
         , _dir    = Down
         , _dead   = False
