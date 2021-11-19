@@ -106,8 +106,9 @@ drawGrid g = withBorderStyle BS.unicodeBold
     cellsInRow y = [drawCoord (V2 x y) | x <- [0..width-1]]
     drawCoord    = drawCell . cellAt
     cellAt c
-      | c == g ^. bird      = Bird
-      | otherwise           = Empty
+      | c == (g ^. bird)                        = Bird
+      | c `elem` (concat (g ^. barriers))       = Barrier
+      | otherwise                               = Empty
 
 drawCell :: Cell -> Widget Name
 drawCell Bird = withAttr birdAttr cw
@@ -120,8 +121,9 @@ cw = str "  "
 
 theMap :: AttrMap
 theMap = attrMap V.defAttr
-  [ (birdAttr, V.blue `on` V.yellow)
-  , (gameOverAttr, fg V.red `V.withStyle` V.bold)
+  [ (birdAttr, V.blue `on` V.yellow),
+    (barrierAttr, V.green `on` V.red),  
+    (gameOverAttr, fg V.red `V.withStyle` V.bold)
   ]
 
 gameOverAttr :: AttrName

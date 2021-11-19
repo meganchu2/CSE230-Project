@@ -12,7 +12,8 @@ module FlappyBird
     score, 
     bird, 
     height, 
-    width
+    width,
+    barriers
   ) where
 
 import Control.Applicative ((<|>))
@@ -39,7 +40,7 @@ makeLenses ''Game
 step :: Game -> Game
 step s = flip execState s . runMaybeT $ do
   MaybeT $ guard . not <$> orM [use paused, use dead] -- Make sure the game isn't paused or over
-  MaybeT . fmap Just $ locked .= False -- Unlock from last directional turn
+  MaybeT . (fmap Just) $ (locked .= False) -- Unlock from last directional turn
   modifying score (+ 1)
   maybeDie <|> MaybeT (Just <$> modify move)
 
@@ -56,9 +57,17 @@ maybeDie = do
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = b } = g 
+move g@Game { _bird = b, _barriers = x } = g 
           & bird .~ (nextPosition g) 
+          & barriers .~ (moveBarriers x)
           & dir .~ Down --sets the Direction back to Down
+
+-- | Move every coordinate in every barrier one step left (i.e. x = x-1)
+moveBarriers :: Barriers -> Barriers
+moveBarriers barriers = map moveBarrier barriers
+  where moveBarrier barrier = map moveCoordinate barrier
+        moveCoordinate (V2 x y) = (V2 (x-1) y)
+
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
@@ -92,6 +101,8 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
+        , _barriers =  [[ V2 (xm+20) (ym-i) | i <- [5..20] ]]  
+                                --TODO: add Game properties to know x/y coordinates of border of grid, create barrier based on this coordinate
         }
   return g
 
