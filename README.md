@@ -19,10 +19,11 @@ System.console.haskeline: We will use this package to process user input from th
 System.Random.Shuffle: We will use this package to provide a different random “course” every time the game is played by shuffling a list of possible gates
 
 # Milestone 2
--What is the architecture of your application (the key components)?
--What challenges (if any) did you have so far and how did you solve them?
--Do you expect to meet your goals until the deadline?
--If not, how will you modify your goals?
+
+* What is the architecture of your application (the key components)?
+* What challenges (if any) did you have so far and how did you solve them?
+* Do you expect to meet your goals until the deadline?
+* If not, how will you modify your goals?
 
 # Source code overview
 
