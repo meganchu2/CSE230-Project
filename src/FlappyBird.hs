@@ -10,6 +10,7 @@ module FlappyBird
   , Direction(..)
   , dead, score, bird
   , height, width
+  , barriers
   ) where
 
 import Control.Applicative ((<|>))
@@ -30,17 +31,21 @@ import Constants
 -- Types
 
 data Game = Game
-  { _bird   :: Bird         -- ^ bird as a coordinate
-  , _dir    :: Direction    -- ^ direction
-  , _dead   :: Bool         -- ^ game over flag
-  , _paused :: Bool         -- ^ paused flag
-  , _score  :: Int          -- ^ score
-  , _locked :: Bool         -- ^ lock to disallow duplicate turns between time steps
+  { _bird   :: Bird         -- bird as a coordinate
+  , _barriers :: Barriers   -- barrier as a sequence of sequence of coordinates
+  , _dir    :: Direction    -- direction
+  , _dead   :: Bool         -- game over flag
+  , _paused :: Bool         -- paused flag
+  , _score  :: Int          -- score
+  , _locked :: Bool         -- lock to prevent duplicate actions between time steps
   } deriving (Show)
 
 type Coord = V2 Int
 
 type Bird = Coord
+
+type Barrier = [Coord]
+type Barriers = [Barrier]
 
 data Stream a = a :| Stream a
   deriving (Show)
@@ -48,6 +53,8 @@ data Stream a = a :| Stream a
 data Direction
   = Up
   | Down
+  | Left 
+  | Right
   deriving (Eq, Show)
 
 makeLenses ''Game
@@ -59,7 +66,7 @@ makeLenses ''Game
 step :: Game -> Game
 step s = flip execState s . runMaybeT $ do
   MaybeT $ guard . not <$> orM [use paused, use dead] -- Make sure the game isn't paused or over
-  MaybeT . fmap Just $ locked .= False -- Unlock from last directional turn
+  MaybeT . (fmap Just) $ (locked .= False) -- Unlock from last directional turn
   modifying score (+ 1)
   die <|> MaybeT (Just <$> modify move)
 
@@ -76,9 +83,17 @@ die = do
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = b } = g 
+move g@Game { _bird = b, _barriers = x } = g 
           & bird .~ (nextPosition g) 
+          & barriers .~ (moveBarriers x)
           & dir .~ Down --sets the Direction back to Down
+
+-- | Move every coordinate in every barrier one step left (i.e. x = x-1)
+moveBarriers :: Barriers -> Barriers
+moveBarriers barriers = map moveBarrier barriers
+  where moveBarrier barrier = map moveCoordinate barrier
+        moveCoordinate (V2 x y) = (V2 (x-1) y)
+
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
@@ -112,6 +127,7 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
+        , _barriers =  [[ V2 (xm+20) (ym+i) | i <- [1..10] ]]  
         }
   return g
 
