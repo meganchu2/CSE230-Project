@@ -52,8 +52,7 @@ maybeDie = do
       nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
       birdPosition <- (use bird);
       barriers <- (use barriers);
-      return (isCoordOnAnyBarrier barriers nextPos)        --check if bird Coord is on barrier
-                                                           --TODO: check if bird is on/below bottom of grid
+      return $ (y < 0) || (isCoordOnAnyBarrier barriers nextPos)        --check if bird Coord is on barrier or on floor
     })  
   MaybeT . (fmap Just) $ (dead .= True)
 
@@ -64,17 +63,23 @@ isCoordOnAnyBarrier barriers c = any isCoordOnBarrier barriers
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = b, _barriers = x } = g 
+move g@Game { _bird = b, _barriers = bs } = g 
           & bird .~ (nextPosition g) 
-          & barriers .~ (moveBarriers x)
+          & barriers .~ (moveBarriers bs'')
+          & barrierGen .~ bsgen
           & dir .~ Down --sets the Direction back to Down
+  where bs' = filter (\((V2 x _):_) -> x >= 0) bs
+        addBsCount = barrierNum - (length bs')
+        (newbs, bsgen) = splitAt addBsCount (g ^. barrierGen)
+        lastX = (\((V2 x _):_) -> x) $ last bs'
+        xs = [lastX + i * barrierInterval | i <- [1..addBsCount]]
+        bs'' = bs' ++ (getBarriers xs newbs)
 
 -- | Move every coordinate in every barrier one step left (i.e. x = x-1)
 moveBarriers :: Barriers -> Barriers
 moveBarriers barriers = map moveBarrier barriers
   where moveBarrier barrier = map moveCoordinate barrier
         moveCoordinate (V2 x y) = (V2 (x-1) y)
-
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
@@ -98,9 +103,10 @@ turn d g = if g ^. locked
 -- | Initialize a paused game 
 initGame :: IO Game
 initGame = do
-  (f :| fs) <- fromList . randomRs (V2 0 0, V2 (width - 1) (height - 1)) <$> newStdGen
+  b <- randomRs (div height 5, height - (div height 5)) <$> newStdGen
   let xm = width `div` 2
       ym = height `div` 2
+      (bs, bg) = splitAt barrierNum b
       g  = Game
         { _bird  = V2 xm ym
         , _score  = 0
@@ -108,10 +114,16 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
-        , _barriers =  [[ V2 (xm+20) (ym-i) | i <- [5..20] ]]  
-                                --TODO: add Game properties to know x/y coordinates of border of grid, create barrier based on this coordinate
+        , _barriers = getBarriers [xm + 20 * i | i <- [1..barrierNum]] bs
+        , _barrierGen = bg
         }
   return g
 
-fromList :: [a] -> Stream a
-fromList = foldr (:|) (error "Streams must be infinite")
+-- | Generate a single barrier
+getBarrier :: Int -> Int -> Barrier
+getBarrier x y = [V2 x i | i <- [1..height], i < y - barrierOpening || i > y + barrierOpening]
+
+-- | Generate barriers
+getBarriers :: [Int] -> [Int] -> Barriers
+getBarriers [] [] = []
+getBarriers (x:xs) (y:ys) = (getBarrier x y) : (getBarriers xs ys)
