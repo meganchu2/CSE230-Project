@@ -9,15 +9,23 @@ import Data.Maybe (fromMaybe)
 import FlappyBird
 
 import Brick
-  ( App(..), AttrMap, BrickEvent(..), EventM, Next, Widget
-  , customMain, neverShowCursor
-  , continue, halt
-  , hLimit, vLimit, vBox, hBox
-  , padRight, padLeft, padTop, padAll, Padding(..)
-  , withBorderStyle
-  , str
-  , attrMap, withAttr, emptyWidget, AttrName, on, fg
-  , (<+>)
+  ( App(..), 
+    AttrMap, 
+    BrickEvent(..), 
+    EventM, 
+    Next, 
+    Widget, 
+    customMain, 
+    neverShowCursor, 
+    continue, 
+    halt, 
+    hLimit, vLimit, 
+    vBox, hBox, 
+    padRight, padLeft, padTop, padAll, Padding(..), 
+    withBorderStyle, 
+    str, 
+    attrMap, withAttr, emptyWidget, AttrName, on, fg, 
+    (<+>)
   )
 import Brick.BChan (newBChan, writeBChan)
 import qualified Brick.Widgets.Border as B
@@ -29,13 +37,8 @@ import Data.Sequence (Seq)
 import qualified Data.Sequence as S
 import Linear.V2 (V2(..))
 
--- Types
-
-data Tick = Tick
-
-type Name = ()
-
-data Cell = Bird | Barrier | Empty
+import Constants
+import UITypes
 
 -- App definition
 
@@ -50,9 +53,10 @@ app = App { appDraw = drawUI
 main :: IO ()
 main = do
   chan <- newBChan 10
-  forkIO $ forever $ do
-    writeBChan chan Tick
-    threadDelay 100000 -- decides how fast your game moves
+  forkIO $ forever $ do {
+    writeBChan chan Tick;
+    threadDelay gameSpeed;
+  }
   g <- initGame
   let builder = V.mkVty V.defaultConfig
   initialVty <- builder
@@ -61,13 +65,12 @@ main = do
 -- Handling events
 
 handleEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
-handleEvent g (AppEvent Tick)                       = continue $ step g
-handleEvent g (VtyEvent (V.EvKey V.KUp []))         = continue $ turn Up g
-handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = continue $ turn Up g
-handleEvent g (VtyEvent (V.EvKey (V.KChar 'u') [])) = continue $ turn Up g
+handleEvent g (AppEvent Tick)                       = continue (step g)
+handleEvent g (VtyEvent (V.EvKey V.KUp []))         = continue (turn Up g)
+handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = continue (turn Up g)
 handleEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
 handleEvent g (VtyEvent (V.EvKey V.KEsc []))        = halt g
-handleEvent g _                                     = continue $ turn Down g
+handleEvent g _                                     = continue (step g)
 
 -- Drawing
 
