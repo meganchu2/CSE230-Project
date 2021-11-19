@@ -3,14 +3,17 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module FlappyBird
-  ( initGame
-  , step
-  , turn
-  , Game(..)
-  , Direction(..)
-  , dead, score, bird
-  , height, width
-  , barriers
+  ( initGame, 
+    step,
+    turn, 
+    Game(..), 
+    Direction(..), 
+    dead, 
+    score, 
+    bird, 
+    height, 
+    width,
+    barriers
   ) where
 
 import Control.Applicative ((<|>))
@@ -23,42 +26,13 @@ import Control.Monad.Trans.State
 import Control.Monad.Extra (orM)
 import Data.Sequence (Seq(..), (<|))
 import qualified Data.Sequence as S
-import Linear.V2 (V2(..), _x, _y)
 import System.Random (Random(..), newStdGen)
+import Linear.V2 (V2(..), _x, _y)
 
 import Constants
-
--- Types
-
-data Game = Game
-  { _bird   :: Bird         -- bird as a coordinate
-  , _barriers :: Barriers   -- barrier as a sequence of sequence of coordinates
-  , _dir    :: Direction    -- direction
-  , _dead   :: Bool         -- game over flag
-  , _paused :: Bool         -- paused flag
-  , _score  :: Int          -- score
-  , _locked :: Bool         -- lock to prevent duplicate actions between time steps
-  } deriving (Show)
-
-type Coord = V2 Int
-
-type Bird = Coord
-
-type Barrier = [Coord]
-type Barriers = [Barrier]
-
-data Stream a = a :| Stream a
-  deriving (Show)
-
-data Direction
-  = Up
-  | Down
-  | Left 
-  | Right
-  deriving (Eq, Show)
+import FlappyBirdTypes
 
 makeLenses ''Game
-
 
 -- Functions
 
@@ -68,11 +42,11 @@ step s = flip execState s . runMaybeT $ do
   MaybeT $ guard . not <$> orM [use paused, use dead] -- Make sure the game isn't paused or over
   MaybeT . (fmap Just) $ (locked .= False) -- Unlock from last directional turn
   modifying score (+ 1)
-  die <|> MaybeT (Just <$> modify move)
+  maybeDie <|> MaybeT (Just <$> modify move)
 
 -- | Possibly die if next position is either on a barrier cell or above below grid (TODO)
-die :: MaybeT (State Game) ()
-die = do
+maybeDie :: MaybeT (State Game) ()
+maybeDie = do
   MaybeT . (fmap guard) $ (do 
     { 
       nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
