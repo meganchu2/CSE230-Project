@@ -31,5 +31,10 @@ stack build
 stack exec flappybird
 ```
 
+Or both at once:
+```bash
+stack build && stack exec flappybird
+```
+
 # Playing the Game
  todo
