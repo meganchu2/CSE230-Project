@@ -63,17 +63,23 @@ isCoordOnAnyBarrier barriers c = any isCoordOnBarrier barriers
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = b, _barriers = x } = g 
+move g@Game { _bird = b, _barriers = bs } = g 
           & bird .~ (nextPosition g) 
-          & barriers .~ (moveBarriers x)
+          & barriers .~ (moveBarriers bs'')
+          & barrierGen .~ bsgen
           & dir .~ Down --sets the Direction back to Down
+  where bs' = filter (\((V2 x _):_) -> x >= 0) bs
+        addBsCount = barrierNum - (length bs')
+        (newbs, bsgen) = splitAt addBsCount (g ^. barrierGen)
+        lastX = (\((V2 x _):_) -> x) $ last bs'
+        xs = [lastX + i * barrierInterval | i <- [1..addBsCount]]
+        bs'' = bs' ++ (getBarriers xs newbs)
 
 -- | Move every coordinate in every barrier one step left (i.e. x = x-1)
 moveBarriers :: Barriers -> Barriers
 moveBarriers barriers = map moveBarrier barriers
   where moveBarrier barrier = map moveCoordinate barrier
         moveCoordinate (V2 x y) = (V2 (x-1) y)
-
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
@@ -100,7 +106,7 @@ initGame = do
   b <- randomRs (div height 5, height - (div height 5)) <$> newStdGen
   let xm = width `div` 2
       ym = height `div` 2
-      (bs, bg) = splitAt 10 b
+      (bs, bg) = splitAt barrierNum b
       g  = Game
         { _bird  = V2 xm ym
         , _score  = 0
@@ -108,7 +114,7 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
-        , _barriers = getBarriers [xm + 20 * i | i <- [1..(length bs)]] bs
+        , _barriers = getBarriers [xm + 20 * i | i <- [1..barrierNum]] bs
         , _barrierGen = bg
         }
   return g
