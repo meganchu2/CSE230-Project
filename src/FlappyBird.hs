@@ -127,7 +127,8 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
-        , _barriers =  [[ V2 (xm+20) (ym+i) | i <- [1..10] ]]  
+        , _barriers =  [[ V2 (xm+20) (ym-i) | i <- [5..20] ]]  
+                                --TODO: add Game properties to know x/y coordinates of border of grid, create barrier based on this coordinate
         }
   return g
 
