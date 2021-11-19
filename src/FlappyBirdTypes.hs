@@ -5,6 +5,7 @@ import Linear.V2 (V2(..), _x, _y)
 data Game = Game
   { _bird   :: Bird         -- ^ bird as a coordinate
   , _barriers :: Barriers   -- barrier as a sequence of sequence of coordinates
+  , _barrierGen :: [Int]    -- infinite list for generating future barriers
   , _dir    :: Direction    -- ^ direction
   , _dead   :: Bool         -- ^ game over flag
   , _paused :: Bool         -- ^ paused flag

@@ -97,9 +97,10 @@ turn d g = if g ^. locked
 -- | Initialize a paused game 
 initGame :: IO Game
 initGame = do
-  (f :| fs) <- fromList . randomRs (V2 0 0, V2 (width - 1) (height - 1)) <$> newStdGen
+  b <- randomRs (div height 5, height - (div height 5)) <$> newStdGen
   let xm = width `div` 2
       ym = height `div` 2
+      (bs, bg) = splitAt 10 b
       g  = Game
         { _bird  = V2 xm ym
         , _score  = 0
@@ -107,10 +108,16 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
-        , _barriers =  [[ V2 (xm+20) (ym-i) | i <- [5..20] ]]  
-                                --TODO: add Game properties to know x/y coordinates of border of grid, create barrier based on this coordinate
+        , _barriers = getBarriers [xm + 20 * i | i <- [1..(length bs)]] bs
+        , _barrierGen = bg
         }
   return g
 
-fromList :: [a] -> Stream a
-fromList = foldr (:|) (error "Streams must be infinite")
+-- | Generate a single barrier
+getBarrier :: Int -> Int -> Barrier
+getBarrier x y = [V2 x i | i <- [1..height], i < y - barrierOpening || i > y + barrierOpening]
+
+-- | Generate barriers
+getBarriers :: [Int] -> [Int] -> Barriers
+getBarriers [] [] = []
+getBarriers (x:xs) (y:ys) = (getBarrier x y) : (getBarriers xs ys)
