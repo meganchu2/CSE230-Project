@@ -103,7 +103,7 @@ drawGrid g = withBorderStyle BS.unicodeBold
     cellsInRow y = [drawCoord (V2 x y) | x <- [0..width-1]]
     drawCoord    = drawCell . cellAt
     cellAt c
-      | c `elem` g ^. bird = Bird
+      | c == g ^. bird      = Bird
       | otherwise           = Empty
 
 drawCell :: Cell -> Widget Name
