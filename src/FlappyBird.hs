@@ -52,7 +52,8 @@ maybeDie = do
       nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
       birdPosition <- (use bird);
       barriers <- (use barriers);
-      return (isCoordOnAnyBarrier barriers nextPos)        --should instead check if nextPos is on barrier or below bottom, (elem nextPos birdPositions || belowBottom )
+      return (isCoordOnAnyBarrier barriers nextPos)        --check if bird Coord is on barrier
+                                                           --TODO: check if bird is on/below bottom of grid
     })  
   MaybeT . (fmap Just) $ (dead .= True)
 
