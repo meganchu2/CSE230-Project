@@ -66,8 +66,12 @@ step s = flip execState s . runMaybeT $ do
 -- | Possibly die if next position is either on a barrier cell or above below grid (TODO)
 die :: MaybeT (State Game) ()
 die = do
-  MaybeT . fmap guard $ elem <$> (nextPosition <$> get) <*> (use bird)
-  MaybeT . fmap Just $ dead .= True
+  --MaybeT . (fmap guard) $ (elem <$> (nextPosition <$> get) <*> (use bird))
+  MaybeT . (fmap guard) $ (do { 
+                            nextPos <- (nextPosition <$> get);      --get next position of bird
+                            birdPositions <- (use bird);            --get current positions of bird
+                            return (elem nextPos birdPositions) })  --check if next position is in current position
+  MaybeT . (fmap Just) $ (dead .= True)
 
 -- | Move snake along in a marquee fashion
 move :: Game -> Game
