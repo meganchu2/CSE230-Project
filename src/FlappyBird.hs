@@ -41,7 +41,6 @@ step :: Game -> Game
 step s = flip execState s . runMaybeT $ do
   MaybeT $ guard . not <$> orM [use paused, use dead] -- Make sure the game isn't paused or over
   MaybeT . (fmap Just) $ (locked .= False) -- Unlock from last directional turn
-  modifying score (+ 1)
   maybeDie <|> MaybeT (Just <$> modify move)
 
 -- | Possibly die if next position is either on a barrier cell or above below grid (TODO)
@@ -68,6 +67,7 @@ move g@Game { _bird = b, _barriers = bs } = g
           & barriers .~ (moveBarriers bs'')
           & barrierGen .~ bsgen
           & dir .~ Down --sets the Direction back to Down
+          & score .~ (updateScore g)
   where bs' = filter (\((V2 x _):_) -> x >= 0) bs
         addBsCount = barrierNum - (length bs')
         (newbs, bsgen) = splitAt addBsCount (g ^. barrierGen)
@@ -80,6 +80,13 @@ moveBarriers :: Barriers -> Barriers
 moveBarriers barriers = map moveBarrier barriers
   where moveBarrier barrier = map moveCoordinate barrier
         moveCoordinate (V2 x y) = (V2 (x-1) y)
+
+-- | Increment the score when the bird passes a barrier
+updateScore :: Game -> Int
+updateScore g@Game {_bird = (V2 x y), _barriers = bs, _score = s}
+  | x `elem` bsXs = s + 1
+  | otherwise = s
+  where bsXs = map (\((V2 x _):_) -> x) bs
 
 -- | Get next position of the bird
 nextPosition :: Game -> Coord
