@@ -103,7 +103,7 @@ turn d g = if g ^. locked
 -- | Initialize a paused game 
 initGame :: IO Game
 initGame = do
-  b <- randomRs (div height 5, height - (div height 5)) <$> newStdGen
+  b <- randomRs (barrierOpeningLo, barrierOpeningHi) <$> newStdGen
   let xm = width `div` 2
       ym = height `div` 2
       (bs, bg) = splitAt barrierNum b
@@ -114,14 +114,14 @@ initGame = do
         , _dead   = False
         , _paused = True
         , _locked = False
-        , _barriers = getBarriers [xm + 20 * i | i <- [1..barrierNum]] bs
+        , _barriers = getBarriers [xm + barrierInterval * i | i <- [1..barrierNum]] bs
         , _barrierGen = bg
         }
   return g
 
 -- | Generate a single barrier
 getBarrier :: Int -> Int -> Barrier
-getBarrier x y = [V2 x i | i <- [1..height], i < y - barrierOpening || i > y + barrierOpening]
+getBarrier x y = [V2 x i | i <- [1..height], i < y - barrierOpeningWidth || i > y + barrierOpeningWidth]
 
 -- | Generate barriers
 getBarriers :: [Int] -> [Int] -> Barriers
