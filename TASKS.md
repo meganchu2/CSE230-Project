@@ -10,9 +10,9 @@
   - [x] move barrier left as time progresses
   - [x] create new barrier every X seconds
   - [x] randomize openings of barriers
-- [ ] scoring
+- [x] scoring
   - [x] show score
-  - [ ] increment score as barriers are cleared
+  - [x] increment score as barriers are cleared
 - [x] gameplay
   - [x] end game if bird hits ground 
   - [x] end game if bird hits barrier
