@@ -62,18 +62,28 @@ isCoordOnAnyBarrier barriers c = any isCoordOnBarrier barriers
 
 -- | Move Bird to next position (up or down) and set direction back to down
 move :: Game -> Game
-move g@Game { _bird = b, _barriers = bs } = g 
+move g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = g 
           & bird .~ (nextPosition g) 
           & barriers .~ (moveBarriers bs'')
-          & barrierGen .~ bsgen
+          & barrierGen .~ bsgen'
           & dir .~ Down --sets the Direction back to Down
           & score .~ (updateScore g)
-  where bs' = filter (\((V2 x _):_) -> x >= 0) bs
-        addBsCount = barrierNum - (length bs')
-        (newbs, bsgen) = splitAt addBsCount (g ^. barrierGen)
-        lastX = (\((V2 x _):_) -> x) $ last bs'
-        xs = [lastX + i * barrierInterval | i <- [1..addBsCount]]
-        bs'' = bs' ++ (getBarriers xs newbs)
+  where (bs', addBsCount) = removeOldBarriers bs
+        (bs'', bsgen') = replenishBarriers bs' bsgen
+
+-- | Remove old barriers and return the number of removed barriers
+removeOldBarriers :: Barriers -> (Barriers, Int)
+removeOldBarriers bs = (bs', barrierNum - length bs')
+  where bs' = filter (\(c:_) -> c ^. _x >= 0) bs
+
+-- | Replenish barriers from the generator list
+replenishBarriers :: Barriers -> [Int] -> (Barriers, [Int])
+replenishBarriers bs bsgen = (bs', bsgen')
+  where newBsNum = barrierNum - length bs
+        (newbs, bsgen') = splitAt newBsNum bsgen
+        lastX = (\(c:_) -> c ^. _x) $ last bs
+        xs = [lastX + i * barrierInterval | i <- [1..newBsNum]]
+        bs' = bs ++ (getBarriers xs newbs)
 
 -- | Move every coordinate in every barrier one step left (i.e. x = x-1)
 moveBarriers :: Barriers -> Barriers
@@ -83,8 +93,8 @@ moveBarriers barriers = map moveBarrier barriers
 
 -- | Increment the score when the bird passes a barrier
 updateScore :: Game -> Int
-updateScore g@Game {_bird = (V2 x y), _barriers = bs, _score = s}
-  | x `elem` bsXs = s + 1
+updateScore g@Game {_bird = b, _barriers = bs, _score = s}
+  | b ^. _x `elem` bsXs = s + 1
   | otherwise = s
   where bsXs = map (\((V2 x _):_) -> x) bs
 
