@@ -121,7 +121,7 @@ turn d g = if g ^. locked
 initGame :: IO Game
 initGame = do
   b <- randomRs (barrierOpeningLo, barrierOpeningHi) <$> newStdGen
-  let xm = width `div` 2
+  let xm = width `div` 5
       ym = height `div` 2
       (bs, bg) = splitAt barrierNum b
       g  = Game
