@@ -56,7 +56,7 @@ To run tests, use `stack`:
 stack test
 ```
 
-If you have updated `tests/Test.hs` you may want to `build` before running tests:
+If you have updated any of the code in the `src` directory, you may want to `build` before running tests:
 ```bash
 stack build && stack test
 ```
