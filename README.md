@@ -48,17 +48,12 @@ stack build && stack exec flappybird
 
 # Testing
 
-Add new tests in `tests/Test.hs`.
+Add new tests in `tests/Test.hs`. Tests are functions beginning with `prop_` and must return type `Bool`.
 
 To run tests, use `stack`:
 
 ```bash
 stack test
-```
-
-If you have updated any of the code in the `src` directory, you may want to `build` before running tests:
-```bash
-stack build && stack test
 ```
 
 # Playing the Game
