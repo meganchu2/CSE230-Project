@@ -30,6 +30,7 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 * `Main.hs`: todo
 * `FlappyBird.hs`: todo
 * `UI.hs`: todo
+* `Test.hs`: todo
 
 # Installation
 
@@ -43,6 +44,21 @@ stack exec flappybird
 Or both at once:
 ```bash
 stack build && stack exec flappybird
+```
+
+# Testing
+
+Add new tests in `tests/Test.hs`.
+
+To run tests, use `stack`:
+
+```bash
+stack test
+```
+
+If you have updated `tests/Test.hs` you may want to `build` before running tests:
+```bash
+stack build && stack test
 ```
 
 # Playing the Game
