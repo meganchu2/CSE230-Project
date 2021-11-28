@@ -82,11 +82,11 @@ handleEvent g _                                     = continue (step g)
 drawUI :: Game -> [Widget Name]
 drawUI g =
   if (g ^. dead)
-    then [drawGameOverScreen g]
+    then [drawGameOverScreen g] ++ [ C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g ]
     else [ C.center $ padRight (Pad 2) (drawStats g) <+> drawGrid g ]
 
 drawGameOverScreen :: Game -> Widget Name
-drawGameOverScreen g = drawGrid g
+drawGameOverScreen g =  withAttr restartAttr $ C.centerLayer $ str "Press Space to Restart"
 
 drawStats :: Game -> Widget Name
 drawStats g = hLimit 11
@@ -133,8 +133,12 @@ theMap :: AttrMap
 theMap = attrMap V.defAttr
   [ (birdAttr, V.blue `on` V.yellow),
     (barrierAttr, V.green `on` V.red),  
-    (gameOverAttr, fg V.red `V.withStyle` V.bold)
+    (gameOverAttr, fg V.red `V.withStyle` V.bold),
+    (restartAttr, (V.blue `on` V.brightYellow) `V.withStyle` V.bold)
   ]
+
+restartAttr :: AttrName
+restartAttr = "restart"
 
 gameOverAttr :: AttrName
 gameOverAttr = "gameOver"
