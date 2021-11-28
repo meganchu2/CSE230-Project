@@ -5,19 +5,24 @@
   - [x] show bird on screen
   - [x] move bird down by default
   - [x] move bird up on key press
+  - [ ] bird moves more for each key press
 - [x] barriers
   - [x] create barrier
   - [x] move barrier left as time progresses
   - [x] create new barrier every X seconds
   - [x] randomize openings of barriers
+  - [ ] barriers wider
 - [x] scoring
   - [x] show score
   - [x] increment score as barriers are cleared
 - [x] gameplay
   - [x] end game if bird hits ground 
   - [x] end game if bird hits barrier
+  - [ ] jump back to initGame screen when gameover
 - [ ] appearance
   - [ ] set colors to match Flappy Bird original
   - [ ] create alternating, moving colors at bottom of of screen to simulate movement 
 - [ ] tests
+  - [ ] FlappyBird.hs (~ half functions need tests)
+  - [ ] UI.hs
 - [ ] restart screen
