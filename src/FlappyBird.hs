@@ -5,7 +5,17 @@
 module FlappyBird
   ( initGame, 
     step,
-    turn, 
+    maybeDie,
+    isCoordOnAnyBarrier,
+    move,
+    removeOldBarriers,
+    replenishBarriers,
+    moveBarriers,
+    updateScore,
+    nextPosition,
+    turn,
+    getBarrier,
+    getBarriers,
     Game(..), 
     Direction(..), 
     dead, 
@@ -121,7 +131,7 @@ turn d g = if g ^. locked
 initGame :: IO Game
 initGame = do
   b <- randomRs (barrierOpeningLo, barrierOpeningHi) <$> newStdGen
-  let xm = width `div` 5
+  let xm = width `div` 4
       ym = height `div` 2
       (bs, bg) = splitAt barrierNum b
       g  = Game
