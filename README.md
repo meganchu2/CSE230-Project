@@ -21,9 +21,13 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 # Milestone 2
 
 * What is the architecture of your application (the key components)?
-  - FlappyBird - backend
-  - UI, puts everything on game display
-  - Brick, Linear.V2 (Coord, Barrier), Random, Control (Lens)
+  - FlappyBird.hs - backend to control game logic (moving Game from current state to next)
+  - UI.hs - game display rendering and interaction
+  - dependencies:
+    - Brick
+    - Linear.V2 (for Coord, Barrier)
+    - Random (for generating barriers) 
+    - Control (Lens)
 * What challenges (if any) did you have so far and how did you solve them?
   - generating random coord/barrier for testing
   - how to test game state/display?
@@ -32,7 +36,7 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 * Do you expect to meet your goals until the deadline?
   - yes, we are on track to finishing main story points
 * If not, how will you modify your goals?
-  - we may not have time to finish additional features, nicer looking bird?, save highest score, etc...
+  - we may not have time to finish additional features (such as nicer looking bird, different difficulties, saving highest score, etc...)
 
 # Source code overview
 
