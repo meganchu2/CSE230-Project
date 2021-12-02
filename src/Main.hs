@@ -1,5 +1,5 @@
 module Main
-  ( main
-  ) where
+( main
+) where
 
 import UI (main)

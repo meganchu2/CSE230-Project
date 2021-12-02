@@ -21,15 +21,29 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 # Milestone 2
 
 * What is the architecture of your application (the key components)?
+  - FlappyBird.hs - backend to control game logic (moving Game from current state to next)
+  - UI.hs - game display rendering and interaction
+  - dependencies:
+    - Brick
+    - Linear.V2 (for Coord, Barrier)
+    - Random (for generating barriers) 
+    - Control (Lens)
 * What challenges (if any) did you have so far and how did you solve them?
+  - generating random coord/barrier for testing
+  - how to test game state/display?
+  - how to represent barrier to easily check if bird dies (used list of coords, if bird coord same as one from barrier)
+  - understanding brick library (looked at packages on hoogle)
 * Do you expect to meet your goals until the deadline?
+  - yes, we are on track to finishing main story points
 * If not, how will you modify your goals?
+  - we may not have time to finish additional features (such as nicer looking bird, different difficulties, saving highest score, etc...)
 
 # Source code overview
 
 * `Main.hs`: todo
 * `FlappyBird.hs`: todo
 * `UI.hs`: todo
+* `Test.hs`: todo
 
 # Installation
 
@@ -43,6 +57,16 @@ stack exec flappybird
 Or both at once:
 ```bash
 stack build && stack exec flappybird
+```
+
+# Testing
+
+Add new tests in `tests/Test.hs`. Tests are functions beginning with `prop_` and must return type `Bool`.
+
+To run tests, use `stack`:
+
+```bash
+stack test
 ```
 
 # Playing the Game

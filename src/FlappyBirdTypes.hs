@@ -1,5 +1,4 @@
 module FlappyBirdTypes where
-
 import Linear.V2 (V2(..), _x, _y)
 
 data Game = Game

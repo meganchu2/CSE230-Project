@@ -5,7 +5,17 @@
 module FlappyBird
   ( initGame, 
     step,
-    turn, 
+    maybeDie,
+    isCoordOnAnyBarrier,
+    move,
+    removeOldBarriers,
+    replenishBarriers,
+    moveBarriers,
+    updateScore,
+    nextPosition,
+    turn,
+    getBarrier,
+    getBarriers,
     Game(..), 
     Direction(..), 
     dead, 
@@ -103,11 +113,11 @@ updateScore g@Game {_bird = b, _barriers = bs, _score = s}
 nextPosition :: Game -> Coord
 nextPosition Game { _dir = d, _bird = a }
   | d == Up    = a 
-                & _y %~ (\y -> (y + 2) )
+                & _y %~ (\y -> (y + 4) )
   | d == Down  = a 
                 & _y %~ (\y -> (y - 1) )
-nextPosition _ = error "Birds can't be empty!"
 
+nextPosition _ = error "Birds can't be empty!"
 
 -- Implicitly unpauses yet locks game
 turn :: Direction -> Game -> Game
@@ -129,7 +139,7 @@ restart g = do
 initGame :: IO Game
 initGame = do
   b <- randomRs (barrierOpeningLo, barrierOpeningHi) <$> newStdGen
-  let xm = width `div` 2
+  let xm = width `div` 4
       ym = height `div` 2
       (bs, bg) = splitAt barrierNum b
       g  = Game
