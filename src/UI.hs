@@ -151,3 +151,12 @@ birdAttr = "birdAttr"
 barrierAttr = "barrierAttr"
 emptyAttr = "emptyAttr"
 skyAttr = "skyAttr"
+
+skyColor, barColor, birdColor, cloudColor, groundColor, grass1Color, grass2Color :: V.Color
+skyColor = V.rgbColor 109 190 199
+barColor = V.rgbColor 62 179 62
+birdColor = V.rgbColor 247 212 69
+cloudColor = V.rgbColor 247 247 247
+groundColor = V.rgbColor 242 229 177
+grass1Color = V.rgbColor 188 242 177
+grass2Color = V.rgbColor 79 173 61
