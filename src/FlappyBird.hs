@@ -23,6 +23,7 @@ module FlappyBird
     bird, 
     height, 
     width,
+    groundLevel,
     barriers
   ) where
 
@@ -61,7 +62,7 @@ maybeDie = do
       nextPos@(V2 x y) <- (nextPosition <$> get);      --get next position of bird
       birdPosition <- (use bird);
       barriers <- (use barriers);
-      return $ (y < 0) || (isCoordOnAnyBarrier barriers nextPos)        --check if bird Coord is on barrier or on floor
+      return $ (y < groundLevel) || (isCoordOnAnyBarrier barriers nextPos)        --check if bird Coord is on barrier or on floor
     })  
   MaybeT . (fmap Just) $ (dead .= True)
 
@@ -127,6 +128,13 @@ turn d g = if g ^. locked
     & paused .~ False 
     & locked .~ True
 
+{-
+restart :: Game -> Game
+restart g = do
+  initGame
+  return g
+-}
+
 -- | Initialize a paused game 
 initGame :: IO Game
 initGame = do
@@ -148,7 +156,7 @@ initGame = do
 
 -- | Generate a single barrier
 getBarrier :: Int -> Int -> Barrier
-getBarrier x y = [V2 x i | i <- [1..height], i < y - barrierOpeningWidth || i > y + barrierOpeningWidth]
+getBarrier x y = [V2 x i | i <- [groundLevel..height], i < y - barrierOpeningWidth || i > y + barrierOpeningWidth]
 
 -- | Generate barriers
 getBarriers :: [Int] -> [Int] -> Barriers
