@@ -35,7 +35,7 @@ import Control.Lens ((^.), makeLenses)
 import qualified Graphics.Vty as V
 import Data.Sequence (Seq)
 import qualified Data.Sequence as S
-import Linear.V2 (V2(..))
+import Linear.V2 (V2(..), _x, _y)
 
 import Constants
 import UITypes
@@ -119,13 +119,17 @@ drawGrid g = withBorderStyle BS.unicodeBold
     cellAt c
       | c == (g ^. bird)                        = Bird
       | c `elem` (concat (g ^. barriers))       = Barrier
-      | otherwise                               = Sky
+      | c ^. _y >= groundLevel                 = Sky
+      | c ^. _y == groundLevel - 1 = Grass1 --if (c ^. _x %2 == 0 && )
+      | otherwise = Ground
 
 drawCell :: Cell -> Widget Name
 drawCell Bird = withAttr birdAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
 drawCell Sky = withAttr skyAttr cw
+drawCell Ground = withAttr groundAttr cw
+drawCell Grass1 = withAttr grass1Attr cw
 
 -- comment
 cw :: Widget Name
@@ -133,10 +137,13 @@ cw = str "  "
 
 theMap :: AttrMap
 theMap = attrMap V.defAttr
-  [ (birdAttr, V.blue `on` V.yellow),
-    (barrierAttr, V.red `on` V.green),  
+  [ (birdAttr, V.blue `on` birdColor),
+    (barrierAttr, V.red `on` barColor),  
     (gameOverAttr, fg V.red `V.withStyle` V.bold),
-    (skyAttr, V.red `on` V.cyan),
+    (skyAttr, V.red `on` skyColor),
+    (groundAttr, V.red `on` groundColor),
+    (grass1Attr, V.red `on` grass1Color),
+    (grass2Attr, V.red `on` grass2Color),
     (restartAttr, (V.blue `on` V.brightYellow) `V.withStyle` V.bold)
   ]
 
@@ -146,11 +153,14 @@ restartAttr = "restart"
 gameOverAttr :: AttrName
 gameOverAttr = "gameOver"
 
-birdAttr, barrierAttr, emptyAttr, skyAttr :: AttrName
+birdAttr, barrierAttr, emptyAttr, skyAttr, groundAttr :: AttrName
 birdAttr = "birdAttr"
 barrierAttr = "barrierAttr"
 emptyAttr = "emptyAttr"
 skyAttr = "skyAttr"
+groundAttr = "groundAttr"
+grass1Attr = "grass1Attr"
+grass2Attr = "grass2Attr"
 
 skyColor, barColor, birdColor, cloudColor, groundColor, grass1Color, grass2Color :: V.Color
 skyColor = V.rgbColor 109 190 199
