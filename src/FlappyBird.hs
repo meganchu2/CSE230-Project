@@ -117,6 +117,13 @@ turn d g = if g ^. locked
     & paused .~ False 
     & locked .~ True
 
+{-
+restart :: Game -> Game
+restart g = do
+  initGame
+  return g
+-}
+
 -- | Initialize a paused game 
 initGame :: IO Game
 initGame = do

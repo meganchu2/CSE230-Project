@@ -73,6 +73,7 @@ handleEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
 handleEvent g (AppEvent Tick)                       = continue (step g)
 handleEvent g (VtyEvent (V.EvKey V.KUp []))         = continue (turn Up g)
 handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = continue (turn Up g)
+--handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = if (g ^. dead) then continue (restart g) else continue (turn Up g)
 handleEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
 handleEvent g (VtyEvent (V.EvKey V.KEsc []))        = halt g
 handleEvent g _                                     = continue (step g)
@@ -118,12 +119,13 @@ drawGrid g = withBorderStyle BS.unicodeBold
     cellAt c
       | c == (g ^. bird)                        = Bird
       | c `elem` (concat (g ^. barriers))       = Barrier
-      | otherwise                               = Empty
+      | otherwise                               = Sky
 
 drawCell :: Cell -> Widget Name
 drawCell Bird = withAttr birdAttr cw
 drawCell Barrier = withAttr barrierAttr cw
 drawCell Empty = withAttr emptyAttr cw
+drawCell Sky = withAttr skyAttr cw
 
 -- comment
 cw :: Widget Name
@@ -132,8 +134,9 @@ cw = str "  "
 theMap :: AttrMap
 theMap = attrMap V.defAttr
   [ (birdAttr, V.blue `on` V.yellow),
-    (barrierAttr, V.green `on` V.red),  
+    (barrierAttr, V.red `on` V.green),  
     (gameOverAttr, fg V.red `V.withStyle` V.bold),
+    (skyAttr, V.red `on` V.cyan),
     (restartAttr, (V.blue `on` V.brightYellow) `V.withStyle` V.bold)
   ]
 
@@ -143,7 +146,8 @@ restartAttr = "restart"
 gameOverAttr :: AttrName
 gameOverAttr = "gameOver"
 
-birdAttr, barrierAttr, emptyAttr :: AttrName
+birdAttr, barrierAttr, emptyAttr, skyAttr :: AttrName
 birdAttr = "birdAttr"
 barrierAttr = "barrierAttr"
 emptyAttr = "emptyAttr"
+skyAttr = "skyAttr"
