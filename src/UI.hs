@@ -72,8 +72,8 @@ main = do
 handleEvent :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
 handleEvent g (AppEvent Tick)                       = continue (step g)
 handleEvent g (VtyEvent (V.EvKey V.KUp []))         = continue (turn Up g)
-handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = continue (turn Up g)
---handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = if (g ^. dead) then continue (restart g) else continue (turn Up g)
+--handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = continue (turn Up g)
+handleEvent g (VtyEvent (V.EvKey (V.KChar ' ') [])) = if (g ^. dead) then continue (restart g) else continue (turn Up g)
 handleEvent g (VtyEvent (V.EvKey (V.KChar 'q') [])) = halt g
 handleEvent g (VtyEvent (V.EvKey V.KEsc []))        = halt g
 handleEvent g _                                     = continue (step g)
