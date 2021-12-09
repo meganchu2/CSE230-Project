@@ -3,7 +3,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module FlappyBird
-  ( initGame, 
+  ( restart,
+    initGame, 
     step,
     maybeDie,
     isCoordOnAnyBarrier,
@@ -75,7 +76,7 @@ isCoordOnAnyBarrier barriers c = any isCoordOnBarrier barriers
 move :: Game -> Game
 move g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = g 
           & bird .~ (nextPosition g) 
-          & barriers .~ (moveBarriers bs'')
+          & barriers .~ (moveBarriers bs'' 1)
           & barrierGen .~ bsgen'
           & dir .~ Down --sets the Direction back to Down
           & score .~ (updateScore g)
@@ -96,11 +97,11 @@ replenishBarriers bs bsgen = (bs', bsgen')
         xs = [lastX + i * barrierInterval | i <- [1..newBsNum]]
         bs' = bs ++ (getBarriers xs newbs)
 
--- | Move every coordinate in every barrier one step left (i.e. x = x-1)
-moveBarriers :: Barriers -> Barriers
-moveBarriers barriers = map moveBarrier barriers
+-- | Move every coordinate in every barrier an indicated amount left (i.e. x = x-i)
+moveBarriers :: Barriers -> Int -> Barriers
+moveBarriers barriers i = map moveBarrier barriers
   where moveBarrier barrier = map moveCoordinate barrier
-        moveCoordinate (V2 x y) = (V2 (x-1) y)
+        moveCoordinate (V2 x y) = (V2 (x-i) y)
 
 -- | Increment the score when the bird passes a barrier
 updateScore :: Game -> Int
@@ -128,12 +129,39 @@ turn d g = if g ^. locked
     & paused .~ False 
     & locked .~ True
 
-{-
+
 restart :: Game -> Game
-restart g = do
-  initGame
-  return g
--}
+restart g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = 
+  g
+    & bird .~ V2 xm ym
+    & score .~ 0
+    & dir .~ Down
+    & dead .~ False
+    & paused .~ True
+    & locked .~ False
+    & barrierGen .~ bsgen'
+    & barriers .~ bs''
+--    & barrierGen .~ bg
+    where
+      xm = width `div` 4
+      ym = height `div` 2
+      (bs'', bsgen') = restartReplenish [] bsgen
+      
+--      (bs, bg) = splitAt barrierNum b
+-- | Remove old barriers and return the number of removed barriers
+restartRemOldBarriers :: Barriers -> (Barriers, Int)
+restartRemOldBarriers bs = (bs', barrierNum - length bs')
+  where bs' = filter (\(c:_) -> c ^. _x >= (width `div` 4)) bs
+
+-- | Replenish barriers from the generator list
+restartReplenish :: Barriers -> [Int] -> (Barriers, [Int])
+restartReplenish bs bsgen = (bs', bsgen')
+  where (newbs, bsgen') = splitAt barrierNum bsgen
+        xs = [(width `div` 4) + i * barrierInterval | i <- [1..barrierNum]]
+        bs' = getBarriers xs newbs
+
+
+
 
 -- | Initialize a paused game 
 initGame :: IO Game
@@ -162,3 +190,13 @@ getBarrier x y = [V2 x i | i <- [groundLevel..height], i < y - barrierOpeningWid
 getBarriers :: [Int] -> [Int] -> Barriers
 getBarriers [] [] = []
 getBarriers (x:xs) (y:ys) = (getBarrier x y) : (getBarriers xs ys)
+
+firstBarrierX :: Barriers -> Int
+firstBarrierX [] = 0
+firstBarrierX barriers = (\(c:_) -> c ^. _x) $ last barriers
+
+newBarriers :: Barriers -> Barriers
+newBarriers [] = []
+newBarriers barriers = map centerBarriers barriers
+  where centerBarriers barrier = map moveCoordinate barrier
+        moveCoordinate (V2 x y) = (V2 (x + ((width `div` 4) - x)) y)
