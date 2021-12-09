@@ -80,12 +80,12 @@ move g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = g
           & barrierGen .~ bsgen'
           & dir .~ Down --sets the Direction back to Down
           & score .~ (updateScore g)
-  where (bs', addBsCount) = removeOldBarriers bs
+  where bs' = removeOldBarriers bs
         (bs'', bsgen') = replenishBarriers bs' bsgen
 
 -- | Remove old barriers and return the number of removed barriers
-removeOldBarriers :: Barriers -> (Barriers, Int)
-removeOldBarriers bs = (bs', barrierNum - length bs')
+removeOldBarriers :: Barriers -> Barriers
+removeOldBarriers bs = bs'
   where bs' = filter (\(c:_) -> c ^. _x >= 0) bs
 
 -- | Replenish barriers from the generator list
@@ -131,7 +131,7 @@ turn d g = if g ^. locked
 
 
 restart :: Game -> Game
-restart g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = 
+restart g@Game { _barrierGen = bsgen } = 
   g
     & bird .~ V2 xm ym
     & score .~ 0
@@ -145,17 +145,11 @@ restart g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } =
     where
       xm = width `div` 4
       ym = height `div` 2
-      (bs'', bsgen') = restartReplenish [] bsgen
-      
---      (bs, bg) = splitAt barrierNum b
--- | Remove old barriers and return the number of removed barriers
-restartRemOldBarriers :: Barriers -> (Barriers, Int)
-restartRemOldBarriers bs = (bs', barrierNum - length bs')
-  where bs' = filter (\(c:_) -> c ^. _x >= (width `div` 4)) bs
+      (bs'', bsgen') = restartReplenish bsgen
 
 -- | Replenish barriers from the generator list
-restartReplenish :: Barriers -> [Int] -> (Barriers, [Int])
-restartReplenish bs bsgen = (bs', bsgen')
+restartReplenish :: [Int] -> (Barriers, [Int])
+restartReplenish bsgen = (bs', bsgen')
   where (newbs, bsgen') = splitAt barrierNum bsgen
         xs = [(width `div` 4) + i * barrierInterval | i <- [1..barrierNum]]
         bs' = getBarriers xs newbs
@@ -188,15 +182,5 @@ getBarrier x y = [V2 x i | i <- [groundLevel..height], i < y - barrierOpeningWid
 
 -- | Generate barriers
 getBarriers :: [Int] -> [Int] -> Barriers
-getBarriers [] [] = []
 getBarriers (x:xs) (y:ys) = (getBarrier x y) : (getBarriers xs ys)
-
-firstBarrierX :: Barriers -> Int
-firstBarrierX [] = 0
-firstBarrierX barriers = (\(c:_) -> c ^. _x) $ last barriers
-
-newBarriers :: Barriers -> Barriers
-newBarriers [] = []
-newBarriers barriers = map centerBarriers barriers
-  where centerBarriers barrier = map moveCoordinate barrier
-        moveCoordinate (V2 x y) = (V2 (x + ((width `div` 4) - x)) y)
+getBarriers _ _ = []
