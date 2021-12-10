@@ -114,7 +114,7 @@ updateScore g@Game {_bird = b, _barriers = bs, _score = s}
 nextPosition :: Game -> Coord
 nextPosition Game { _dir = d, _bird = a }
   | d == Up    = a 
-                & _y %~ (\y -> (y + 4) )
+                & _y %~ (\y -> min (y + 4) height)
   | d == Down  = a 
                 & _y %~ (\y -> (y - 1) )
 
