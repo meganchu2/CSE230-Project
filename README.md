@@ -70,4 +70,9 @@ stack test
 ```
 
 # Playing the Game
- todo
+ 
+ * `spacebar` starts the game 
+ * `spacebar` makes the bird jump
+ * `spacebar` resets the game after "game over"
+ * `q` or `esc` may be pressed at any time to exit the game
+
