@@ -61,7 +61,7 @@ stack build && stack exec flappybird
 
 # Testing
 
-Add new tests in `tests/Test.hs`. Tests are functions beginning with `prop_` and must return type `Bool`.
+Add new tests in `tests/Test.hs`. Tests are functions beginning with `prop_` and must return type `Bool` or `Property`.
 
 To run tests, use `stack`:
 
