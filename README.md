@@ -38,12 +38,17 @@ System.Random.Shuffle: We will use this package to provide a different random â€
 * If not, how will you modify your goals?
   - we may not have time to finish additional features (such as nicer looking bird, different difficulties, saving highest score, etc...)
 
-# Source code overview
+# Source code 
 
-* `Main.hs`: todo
-* `FlappyBird.hs`: todo
-* `UI.hs`: todo
-* `Test.hs`: todo
+* src
+  * `Main.hs`
+  * `FlappyBird.hs`: handles main game-state logic
+  * `UI.hs`: handles rendering and user input
+  * `FlappyBirdTypes.hs`: types used by FlappyBird.hs
+  * `UITypes.hs`: types used by UI.hs
+  * `Constants.hs`: game constants (width, height, speed, etc.)
+* test
+  * `Test.hs`: unit tests for FlappyBird.hs code
 
 # Installation
 
