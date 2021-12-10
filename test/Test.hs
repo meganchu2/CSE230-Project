@@ -24,8 +24,8 @@ import UI hiding (main)
 -- allow random generation of Coord type for testing
 instance Arbitrary Coord where
    arbitrary = do
-     Positive x <- arbitrary
-     Positive y <- arbitrary
+     NonNegative x <- arbitrary
+     NonNegative y <- arbitrary
      return $ V2 x y
 
 -- Constants.hs-----------------------------
@@ -34,6 +34,9 @@ prop_height = height == 30
 
 prop_width::Bool
 prop_width = width == 50
+
+prop_groundLevel::Bool
+prop_groundLevel = (groundLevel < height) && (groundLevel >=0)
 
 prop_barrierInterval::Bool
 prop_barrierInterval = barrierInterval > 0 && barrierInterval < div width 2
@@ -58,18 +61,21 @@ prop_getHi a b = if a > 0 && b > 0
 prop_gameSpeed::Bool
 prop_gameSpeed = gameSpeed > 0
 
+
+
 --------------------------------------------
 
--- FlappyBird.hs----------------------------
+-- FlappyBird.hs we only unit tested the functions that were not directly linked to the UI
+-- for functions linked to the UI, it would be difficult to test with code
 
---output is bool
+--check function outputs a bool
 prop_isCoordOnAnyBarrier1::Barriers -> Coord -> Bool
 prop_isCoordOnAnyBarrier1 bs c = case (isCoordOnAnyBarrier bs c) of
                                     True -> True
                                     False -> True
                                     _ -> False
 
---outputted bool is correct
+--check that outputted bool is correct
 prop_isCoordOnAnyBarrier2::Barriers -> Coord -> Bool
 prop_isCoordOnAnyBarrier2 bs c = (isCoordOnAnyBarrier bs c) == ((length (filter (==c) (intercalate [] bs))) > 0)
 
@@ -77,7 +83,7 @@ prop_isCoordOnAnyBarrier2 bs c = (isCoordOnAnyBarrier bs c) == ((length (filter 
 prop_getBarrier1::Int -> Int -> Bool
 prop_getBarrier1 x y = length (filter (/=x) (map (\v -> v ^._x) (getBarrier x y))) == 0
 
---no coord in barrier has y values not in opening
+--barrier does not have y values in opening
 prop_getBarrier2::Int -> Int -> Bool
 prop_getBarrier2 x y = length (filter (\val -> val >= (y-barrierOpeningWidth) && val <= (y+barrierOpeningWidth)) 
                                       (map (\v -> v ^._y) 
@@ -92,18 +98,103 @@ prop_getBarriers a b = if length a == length b
 --move
 --maybeDie
 --step
---removeOldBarriers
---replenishBarriers
---moveBarriers
+
+-- number of remaining barriers should be the same as the number of barriers with x of the first coord > 0
+prop_removeOldBarriers::Barriers -> Property
+prop_removeOldBarriers bs =  restrictNumCoords bs ==> 
+                             length (removeOldBarriers bs) == countBarriersAboveZero bs
+
+restrictNumCoords:: Barriers -> Bool
+restrictNumCoords [] = True
+restrictNumCoords (b:bs) = if length b == 0 then False else restrictNumCoords bs 
+
+countBarriersAboveZero:: Barriers -> Int
+countBarriersAboveZero [] = 0
+countBarriersAboveZero ([]:bs) = countBarriersAboveZero bs
+countBarriersAboveZero (b:bs) =  let (c:cs)=b in if c ^._x >=0 then 1 + countBarriersAboveZero bs else countBarriersAboveZero bs
+
+--replenishBarriers should output default num of barriers
+prop_replenishBarriers1::Barriers -> [Int] -> Property
+prop_replenishBarriers1 bs bsgen = restrictNumCoords bs && restrictNumBarriers bs ==> 
+                                  if restrictGenerator bsgen -- so we don't discard too many tests
+                                    then let (newbs,bsgen')=replenishBarriers bs bsgen in 
+                                           length newbs == barrierNum
+                                    else True --pass if not enough generated values
+
+-- all barriers should be same interval apart
+prop_replenishBarriers2::Barriers -> [Int] -> Property
+prop_replenishBarriers2 bs bsgen = restrictNumCoords bs && restrictNumBarriers bs ==> 
+                                  if restrictGenerator bsgen && checkIntervals bs--so we don't discard too many tests
+                                    then let (newbs,bsgen')=replenishBarriers bs bsgen in 
+                                           checkIntervals newbs
+                                    else True --pass if not enough generated values
+
+checkIntervals:: Barriers -> Bool
+checkIntervals [] = True
+checkIntervals [b] = True
+checkIntervals (b1:b2:bs) = let (c1:_) = b1 in let (c2:_)=b2 in c2 ^._x - c1 ^._x == barrierInterval
+
+-- make sure we never have more than capped number of barriers
+restrictNumBarriers::Barriers -> Bool
+restrictNumBarriers [] = False -- need at least one barrier to generate new ones
+restrictNumBarriers bs = length bs <= barrierNum
+
+--make sure we don't run out of generated values
+restrictGenerator::[Int] -> Bool
+restrictGenerator [] = False
+restrictGenerator bsgen = length bsgen >= barrierNum
+
+--number of barriers after moving should be same
+prop_moveBarriers1::Barriers -> Int -> Bool
+prop_moveBarriers1 bs i = length bs == length (moveBarriers bs i)
+
+-- x values of moved barriers should be i units less than original x
+prop_moveBarriers2::Barriers -> Int -> Property
+prop_moveBarriers2 bs i = i >= 0 ==>
+                          xIsLess (moveBarriers bs i) bs i
+
+xIsLess::Barriers -> Barriers -> Int -> Bool
+xIsLess [] [] i = True
+xIsLess (m:ms) (b:bs) i = if allCoordLess m b i then xIsLess ms bs i else False
+
+allCoordLess::Barrier -> Barrier -> Int -> Bool
+allCoordLess [] [] i = True
+allCoordLess (c1:cs1) (c2:cs2) i = if c1 ^._x +i== c2 ^._x then allCoordLess cs1 cs2 i else False
+
+
+--restartReplenish always generates default number of barriers
+prop_restartReplenish1::[Int] -> Property
+prop_restartReplenish1 bsgen = restrictGenerator bsgen ==> 
+                                 let (newbs,bsgen')=restartReplenish bsgen in 
+                                   length newbs == barrierNum
+
+-- x values in a barriers is always the same
+prop_restartReplenish2::[Int] -> Property
+prop_restartReplenish2 bsgen = restrictGenerator bsgen ==> 
+                                 let (newbs,bsgen')=restartReplenish bsgen in 
+                                           xIsSame newbs
+xIsSame::Barriers -> Bool
+xIsSame [] = True
+xIsSame (b:bs) = if coordXSame b then xIsSame bs else False
+               where
+                 coordXSame [] = True
+                 coordXSame [a] = True
+                 coordXSame (a1:a2:as) = if a1 ^._x == a2 ^._x then coordXSame as else False
+
+-- barriers always be barrier interval apart
+prop_restartReplenish3::[Int] -> Property
+prop_restartReplenish3 bsgen = restrictGenerator bsgen ==> 
+                                 let (newbs,bsgen')=restartReplenish bsgen in 
+                                           checkIntervals newbs
+
 --updateScore
 --initGame
 --turn
 --nextPosition
 
-
 --------------------------------------------
 
--- UI.hs -----------------------------------
+-- UI.hs we manually tested these to make sure they looked right
 -- handleEvent
 -- drawUI
 -- drawStats
@@ -113,8 +204,8 @@ prop_getBarriers a b = if length a == length b
 -- drawCell
 --------------------------------------------
 
-prop_dummyTestShouldFail::Bool
-prop_dummyTestShouldFail = 1==2
+prop_dummyTestShouldFail::Coord -> Bool
+prop_dummyTestShouldFail vec = vec ^._x == vec ^._y
 
 return []
 main =  $forAllProperties quickCheckResult          

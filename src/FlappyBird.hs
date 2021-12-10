@@ -25,6 +25,7 @@ module FlappyBird
     height, 
     width,
     groundLevel,
+    restartReplenish,
     barriers
   ) where
 
@@ -83,7 +84,7 @@ move g@Game { _bird = b, _barriers = bs, _barrierGen = bsgen } = g
   where bs' = removeOldBarriers bs
         (bs'', bsgen') = replenishBarriers bs' bsgen
 
--- | Remove old barriers and return the number of removed barriers
+-- | Remove old barriers and return the remaining barriers
 removeOldBarriers :: Barriers -> Barriers
 removeOldBarriers bs = bs'
   where bs' = filter (\(c:_) -> c ^. _x >= 0) bs
